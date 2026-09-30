@@ -1,12 +1,8 @@
 # init.recovery.qcom.rc — Redmi K90 Pro Max / myron
-# TWRP 16 / SM8850 / canoe / NXP KeyMint / Virtual A/B
+# AERA 16 / SM8850 / canoe / NXP KeyMint / Virtual A/B
 # SPDX-License-Identifier: Apache-2.0
 
-#为什么要导入两遍？(init.rc中已包含)
-#import /init.recovery.logd.rc
-#import /init.recovery.ldconfig.rc
-#import /init.recovery.usb.rc
-#import /init.recovery.service.rc
+# Core recovery services are already imported by the main init.rc.
 import /init.recovery.hlthchrg.rc
 import /init.recovery.wifi.rc
 
@@ -29,6 +25,7 @@ on early-fs
 
 on init
     start vendor.boot-qti
+    setprop prepdecrypt.setpatch true
 
 on fs
     # Stable bootdevice path
@@ -67,29 +64,17 @@ on boot
     setprop sys.usb.config adb
     setprop sys.usb.configfs 1
 
-    chmod 0755 /sbin/iw
-    chmod 0755 /sbin/wifi-dhcp.sh
-    chmod 0755 /sbin/wifi-load-modules.sh
-    chmod 0755 /sbin/wpa_cli
-    chmod 0755 /sbin/wpa_supplicant
-
 on property:ro.boot.usbcontroller=*
     setprop sys.usb.controller ${ro.boot.usbcontroller}
 
 # -----------------------------------------------------------------------------
 # Post-module-load setup
-# TWRP sets twrp.modules.loaded=true after loading kernel modules.
+# The recovery backend sets twrp.modules.loaded=true after loading modules.
 # -----------------------------------------------------------------------------
 on property:twrp.modules.loaded=true
     # Mount modem firmware (slot-aware)
     mount vfat /dev/block/bootdevice/by-name/modem${ro.boot.slot_suffix} /vendor/firmware_mnt ro
     mount none /vendor/firmware_mnt /firmware bind
-    chmod 0755 /sbin/iw
-    chmod 0755 /sbin/wifi-dhcp.sh
-    chmod 0755 /sbin/wifi-load-modules.sh
-    chmod 0755 /sbin/wpa_cli
-    chmod 0755 /sbin/wpa_supplicant
-
     # Load ADSP for PMIC
     wait /sys/kernel/boot_adsp/boot
     write /sys/kernel/boot_adsp/boot 1

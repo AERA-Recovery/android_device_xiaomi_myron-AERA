@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2026 OrangeFox Recovery Project
+# Copyright (C) 2026 AERA Recovery Project contributors
 # SPDX-License-Identifier: Apache-2.0
 #
 

@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2026 OrangeFox Recovery Project
+# Copyright (C) 2026 AERA Recovery Project contributors
 # Device: Xiaomi myron (POCO F8 Ultra / Redmi K90 Pro Max)
-# Branch: OrangeFox 14.1
+# Branch: AERA 16.0
 # SoC   : Snapdragon 8 Elite Gen 5 (SM8850 / canoe)
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -16,8 +16,10 @@
 DEVICE_PATH := device/xiaomi/myron
 
 # Shipping API level
+BOARD_SHIPPING_API_LEVEL := 35
 PRODUCT_SHIPPING_API_LEVEL := 35
-#允许4 KB对齐的二进制文件,getconf PAGESIZE的值为4096,因此关闭检查无影响
+PRODUCT_TARGET_VNDK_VERSION := 35
+# The device uses 4 KiB pages, so disable the 16 KiB prebuilt alignment check.
 PRODUCT_CHECK_PREBUILT_MAX_PAGE_SIZE := false
 # ─── Dynamic partitions ───────────────────────────────────────────────────────
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
@@ -34,6 +36,7 @@ PRODUCT_APEX_SYSTEM_SERVER_JARS += com.android.crashrecovery:service-crashrecove
 
 # ─── lptools ──────────────────────────────────────────────────────────────────
 PRODUCT_PACKAGES += \
+    aera-browser-jail \
     lpflash \
     lpmake \
     lpunpack

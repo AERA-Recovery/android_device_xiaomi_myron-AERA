@@ -1,8 +1,8 @@
 #
-# Copyright (C) 2026 The OrangeFox Recovery Project
+# Copyright (C) 2026 AERA Recovery Project contributors
 # Device : Xiaomi POCO F8 Ultra / Redmi K90 Pro Max (myron)
 # SoC    : Snapdragon 8 Elite Gen 5 (SM8850 / sun)
-# Branch : OrangeFox 14.1
+# Branch : AERA 16.0
 #
 # Confirmed from:
 #   fastboot getvar all  (partition sizes, slots, logical flags)
@@ -147,10 +147,11 @@ TARGET_USERIMAGES_USE_F2FS         := true
 #   system, system_ext, product, vendor, vendor_dlkm, odm,
 #   system_dlkm, mi_ext, neo_inject
 #
-# OFox R12.1 accepts max 7 partition names in PARTITION_LIST.
+# Keep the recovery logical-partition list focused on the seven slot-aware
+# partitions used for ordinary image operations.
 # system_dlkm MUST be included (is-logical=yes, in AB_OTA).
 # mi_ext is Xiaomi-only, NOT in AB_OTA → excluded from list.
-# neo_inject has no _b slot → not managed by OFox.
+# neo_inject has no _b slot and is not managed by recovery.
 # ─────────────────────────────────────────────────────────
 BOARD_SUPER_PARTITION_SIZE := 14495514624
 BOARD_SUPER_PARTITION_GROUPS := xiaomi_dynamic_partitions
@@ -194,14 +195,12 @@ $(foreach p, $(BOARD_PARTITION_LIST), $(eval TARGET_COPY_OUT_$(p) := $(call to-l
 # ─────────────────────────────────────────────────────────
 BOARD_USES_METADATA_PARTITION    := true
 BOARD_USES_QCOM_FBE_DECRYPTION   := true
-TW_INCLUDE_CRYPTO                := true
-TW_INCLUDE_CRYPTO_FBE            := true
-TW_INCLUDE_FBE_METADATA_DECRYPT  := true
+AERA_INCLUDE_CRYPTO                := true
+AERA_INCLUDE_CRYPTO_FBE            := true
+AERA_INCLUDE_FBE_METADATA_DECRYPT  := true
 
 # KeyMint AIDL — v4 QTI TEE + v3 ODM strongbox (NXP/Thales JavaCard)
-TW_CRYPTO_USE_VENDOR_KEYMINT      := true
-TW_KEYMINT_CLIENT_CONNECT_TIMEOUT := 4000
-TW_USE_FSCRYPT_POLICY            := 2
+AERA_USE_FSCRYPT_POLICY := 2
 
 # Security patch bypass (anti-rollback workaround)
 # Confirmed: version-os=99.87.36 (fastboot), ro.build.version.release=99.87.36 (getprop)
@@ -217,8 +216,9 @@ BOOT_SECURITY_PATCH          := $(PLATFORM_SECURITY_PATCH)
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_RECOVERY_QCOM_RTC_FIX := true
 TARGET_RECOVERY_FSTAB        := $(DEVICE_PATH)/recovery.fstab
-TW_INCLUDE_FASTBOOTD         := true
-TW_SKIP_ADDITIONAL_FSTAB     := true
+AERA_INCLUDE_FASTBOOTD         := true
+AERA_SKIP_ADDITIONAL_FSTAB     := true
+AERA_UI_ADAPTIVE_RESOLUTION    := true
 TARGET_SYSTEM_PROP           += $(DEVICE_PATH)/system.prop
 
 # ─────────────────────────────────────────────────────────
@@ -227,20 +227,20 @@ TARGET_SYSTEM_PROP           += $(DEVICE_PATH)/system.prop
 #   ro.boot.panel_build_id=Pc0, panel_cell_id=AL7557J01UB961 (getprop)
 #   Resolution 1200x2608 (from variant-script.sh in TWRP ramdisk)
 #   y_offset=111, h_offset=-111 confirmed from bootconfig
-#   TW_BRIGHTNESS_PATH confirmed from /sys/class/backlight/panel0-backlight
-#   TW_MAX_BRIGHTNESS=4094 (standard for Xiaomi OLED)
+#   Brightness path confirmed from /sys/class/backlight/panel0-backlight
+#   Maximum brightness is 4094
 # ─────────────────────────────────────────────────────────
 TARGET_USES_VULKAN       := true
-TW_THEME                 := portrait_hdpi
-TW_FRAMERATE             := 120
-TW_BRIGHTNESS_PATH       := "/sys/class/backlight/panel0-backlight/brightness"
-TW_DEFAULT_BRIGHTNESS    := 1200
-TW_MAX_BRIGHTNESS        := 4094
-TW_NO_SCREEN_BLANK  := true
-TW_SCREEN_BLANK_ON_BOOT  := true
+AERA_THEME                 := portrait_hdpi
+AERA_FRAMERATE             := 120
+AERA_BRIGHTNESS_PATH       := "/sys/class/backlight/panel0-backlight/brightness"
+AERA_DEFAULT_BRIGHTNESS    := 1200
+AERA_MAX_BRIGHTNESS        := 4094
+AERA_NO_SCREEN_BLANK       := true
+AERA_SCREEN_BLANK_ON_BOOT  := true
 TARGET_SCREEN_WIDTH      := 1200
 TARGET_SCREEN_HEIGHT     := 2608
-TW_STATUS_ICONS_ALIGN    := center
+AERA_STATUS_ICONS_ALIGN  := center
 
 
 
@@ -251,37 +251,31 @@ TW_STATUS_ICONS_ALIGN    := center
 # ─────────────────────────────────────────────────────────
 RECOVERY_SDCARD_ON_DATA   := true
 TARGET_USES_MKE2FS        := true
-TW_ENABLE_FS_COMPRESSION  := true
-TW_INCLUDE_FUSE_EXFAT     := true
-TW_INCLUDE_FUSE_NTFS      := true
-TW_INCLUDE_NTFS_3G        := false
-TW_NO_EXFAT_FUSE          := true
+AERA_ENABLE_FS_COMPRESSION  := true
+AERA_INCLUDE_FUSE_EXFAT     := true
+AERA_INCLUDE_FUSE_NTFS      := true
+AERA_INCLUDE_NTFS_3G        := false
+AERA_NO_EXFAT_FUSE          := true
 
 # ─────────────────────────────────────────────────────────
 # Tools
 # ─────────────────────────────────────────────────────────
-TW_INCLUDE_7ZA          := true
-TW_INCLUDE_LIBRESETPROP := true
-TW_INCLUDE_LPDUMP       := true
-TW_INCLUDE_LPTOOLS      := true
-TW_INCLUDE_REPACKTOOLS  := true
-TW_INCLUDE_RESETPROP    := true
-TW_USE_TOOLBOX          := true
-TW_ENABLE_ALL_PARTITION_TOOLS := true
-TW_USE_DMCTL            := true
-# TW_USE_QCOM_HAPTICS_VIBRATOR := true  ← disabled: vibratorfeature service not running in recovery → blocks UI 5s per touch
-TW_USE_BATTERY_SYSFS_STATS    := true
-# myron: mca_business_battery driver exposes battery ở path platform-specific
-# Confirmed từ logcat AVC audit: soc:mca_business_battery/power_supply/battery/capacity
-# Path ngắn /sys/class/power_supply/battery là symlink kernel tạo tự động → OK
-TW_POWER_SUPPLY_BATTERY_PATH  := "/sys/class/power_supply/battery"
-TW_DEFAULT_TIMEZONE           := "Asia/Shanghai"
+AERA_INCLUDE_7ZA          := true
+AERA_INCLUDE_LIBRESETPROP := true
+AERA_INCLUDE_LPDUMP       := true
+AERA_INCLUDE_LPTOOLS      := true
+AERA_INCLUDE_REPACKTOOLS  := true
+AERA_INCLUDE_RESETPROP    := true
+AERA_USE_TOOLBOX          := true
+AERA_ENABLE_ALL_PARTITION_TOOLS := true
+AERA_USE_DMCTL            := true
+AERA_DEFAULT_TIMEZONE     := Asia/Shanghai
 
 # ─────────────────────────────────────────────────────────
 # Debug
 # ─────────────────────────────────────────────────────────
 TARGET_USES_LOGD         := true
-TWRP_INCLUDE_LOGCAT      := true
+AERA_INCLUDE_LOGCAT      := true
 TARGET_RECOVERY_DEVICE_MODULES += debuggerd strace
 RECOVERY_BINARY_SOURCE_FILES += $(TARGET_OUT_EXECUTABLES)/debuggerd
 RECOVERY_BINARY_SOURCE_FILES += $(TARGET_OUT_EXECUTABLES)/strace
@@ -291,9 +285,10 @@ RECOVERY_BINARY_SOURCE_FILES += $(TARGET_OUT_EXECUTABLES)/strace
 # Touch: focaltech_touch_3683.ko (FTS IC — confirmed from odm ramdisk)
 # Audio: ADSP modules required for keymint/weaver init chain
 # ─────────────────────────────────────────────────────────
-TW_LOAD_VENDOR_MODULES := "focaltech_touch_3683.ko xiaomi_touch.ko adsp_loader_dlkm.ko q6_dlkm.ko q6_pdr_dlkm.ko q6_notifier_dlkm.ko snd_event_dlkm.ko gpr_dlkm.ko spf_core_dlkm.ko rproc_qcom_common.ko qcom_q6v5.ko qcom_q6v5_pas.ko qcom_sysmon.ko qcom-hv-haptics.ko swr_haptics_dlkm.ko"
-TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
-TW_LOAD_PREBUILT_MODULES_AT_FIRST  := true
+AERA_LOAD_VENDOR_MODULES := "focaltech_touch_3683.ko xiaomi_touch.ko adsp_loader_dlkm.ko q6_dlkm.ko q6_pdr_dlkm.ko q6_notifier_dlkm.ko snd_event_dlkm.ko gpr_dlkm.ko spf_core_dlkm.ko rproc_qcom_common.ko qcom_q6v5.ko qcom_q6v5_pas.ko qcom_sysmon.ko qcom-hv-haptics.ko swr_haptics_dlkm.ko"
+AERA_POST_DECRYPT_MODULES := "smem-mailbox.ko cnss_prealloc.ko cnss_utils.ko cnss_plat_ipc_qmi_svc.ko cnss_nl.ko wlan_firmware_service.ko cnss2.ko rfkill.ko cfg80211.ko gsim.ko rmnet_mem.ko ipam.ko qca_cld3_peach_v2.ko"
+AERA_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
+AERA_LOAD_PREBUILT_MODULES_AT_FIRST := true
 
 # ─────────────────────────────────────────────────────────
 # Vibrator (cs40l26 haptics)
@@ -307,35 +302,29 @@ TW_LOAD_PREBUILT_MODULES_AT_FIRST  := true
 # ─────────────────────────────────────────────────────────
 # Haptics AIDL — libs pulled from /system/lib64/ (android.hardware.vibrator-V1-ndk.so + libxml2.so)
 # placed in recovery/root/odm/lib64/ + LD_LIBRARY_PATH updated in service RC
+AERA_SUPPORT_INPUT_FF_HAPTICS := true
 
-#TW_SUPPORT_INPUT_AIDL_HAPTICS                      := true
-
-
-
-TW_NO_LEGACY_PROPS          := true
-# Tăng wait time: mca_business_battery driver cần ~1.7s để probe (dmesg)
-# 8 giây đủ margin kể cả khi ADSP boot chậm
-TW_BATTERY_SYSFS_WAIT_SECONDS := 8
+# The mca battery driver needs roughly 1.7 seconds to probe; retain margin for
+# a slow ADSP start.
+AERA_BATTERY_SYSFS_WAIT_SECONDS := 8
+AERA_NO_LEGACY_PROPS := true
 
 # ─────────────────────────────────────────────────────────
 # Misc
 # ─────────────────────────────────────────────────────────
-TW_EXTRA_LANGUAGES    := true
-TW_DEFAULT_LANGUAGE   := zh_CN
-# Blacklist non-touch input devices to prevent OFox polling ghost events
+AERA_EXTRA_LANGUAGES    := true
+AERA_DEFAULT_LANGUAGE   := en
+# Blacklist non-touch input devices to prevent polling ghost events
 # qcom-hv-haptics: FF-only device, no touch events, causes poll stall
 # uinput-xiaomi:   virtual key device, not a real touchscreen
-TW_INPUT_BLACKLIST    := "hbtp_vm:qcom-hv-haptics:uinput-xiaomi"
-TW_EXCLUDE_APEX       := true
-TW_EXCLUDE_DEFAULT_USB_INIT := true
-TW_HAS_EDL_MODE       := false
-TW_USE_SERIALNO_PROPERTY_FOR_DEVICE_ID := true
-TW_CUSTOM_CPU_TEMP_PATH := "/sys/class/thermal/thermal_zone45/temp"
-TW_BACKUP_EXCLUSIONS  := /data/fonts
-TW_DEVICE_VERSION     := REDMI_K90_Pro_Max
+AERA_INPUT_BLACKLIST    := "hbtp_vm:qcom-hv-haptics:uinput-xiaomi"
+AERA_EXCLUDE_APEX       := true
+AERA_EXCLUDE_DEFAULT_USB_INIT := true
+AERA_HAS_EDL_MODE       := false
+AERA_USE_SERIALNO_PROPERTY_FOR_DEVICE_ID := true
+AERA_CUSTOM_CPU_TEMP_PATH := "/sys/class/thermal/thermal_zone45/temp"
+AERA_BACKUP_EXCLUSIONS  := /data/fonts
+AERA_DEVICE_VERSION     := REDMI_K90_Pro_Max
 
-#解密Data
-TW_INCLUDE_OMAPI := true
-
-#MTP支持
-TW_HAS_MTP := true
+# StrongBox-assisted data decryption
+AERA_INCLUDE_OMAPI := true

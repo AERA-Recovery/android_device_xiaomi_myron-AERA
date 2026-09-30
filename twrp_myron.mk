@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2026 OrangeFox Recovery Project
+# Copyright (C) 2026 AERA Recovery Project contributors
 # Device: Xiaomi myron (POCO F8 Ultra / Redmi K90 Pro Max)
-# Branch: OrangeFox 14.1
+# Branch: AERA 16.0
 # SoC   : Snapdragon 8 Elite Gen 5 (SM8850 / sun)
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -27,11 +27,11 @@ $(call inherit-product, vendor/twrp/config/common.mk)
 # Configure full_base_telephony.mk
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 
-# 配置硬件信息
+# Device hardware configuration
 $(call inherit-product, device/xiaomi/myron/device.mk)
 
-#TWRP/OrangeFox特有的配置
-$(call inherit-product, device/xiaomi/myron/fox_myron.mk)
+# AERA-specific recovery configuration
+$(call inherit-product, device/xiaomi/myron/aera_myron.mk)
 
 PRODUCT_DEVICE       := myron
 PRODUCT_NAME         := twrp_myron
@@ -43,3 +43,5 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
     PRIVATE_BUILD_DESC="myron-user 16 BQ2A.250705.001-BP2A.250605.031.A3 OS3.0.303.0.WPMCNXM release-keys"
 
 BUILD_FINGERPRINT := Redmi/myron/myron:16/BQ2A.250705.001-BP2A.250605.031.A3/OS3.0.303.0.WPMCNXM:user/release-keys
+
+AERA_STATUS_ICONS_ALIGN := center
