@@ -41,3 +41,10 @@ AERA_NO_TREBLE_COMPATIBILITY_CHECK := 1
 AERA_USE_LZ4_COMPRESSION := 1
 AERA_ENABLE_WLAN := 1
 AERA_ENABLE_FRP_ADDON := 1
+
+# This ROM family may leave an already populated /data/media/0 without a
+# directory-level fscrypt policy. The CE key still unlocks its contents; allow
+# AERA to complete the post-decrypt /sdcard and MTP hand-off in that exact case.
+AERA_ALLOW_POPULATED_MEDIA_WITHOUT_POLICY := 1
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+    ro.aera.allow_nonempty_media=$(AERA_ALLOW_POPULATED_MEDIA_WITHOUT_POLICY)
