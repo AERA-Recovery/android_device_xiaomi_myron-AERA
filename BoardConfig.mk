@@ -281,14 +281,18 @@ RECOVERY_BINARY_SOURCE_FILES += $(TARGET_OUT_EXECUTABLES)/debuggerd
 RECOVERY_BINARY_SOURCE_FILES += $(TARGET_OUT_EXECUTABLES)/strace
 
 # ─────────────────────────────────────────────────────────
-# Vendor modules (kernel modules for touch / audio / ADSP)
-# Touch: focaltech_touch_3683.ko (FTS IC — confirmed from odm ramdisk)
-# Audio: ADSP modules required for keymint/weaver init chain
+# Vendor modules for touch, the SM8850 Adreno 840 and the Qualcomm audio DSP.
+# msm_kgsl is bundled from Myron's matching vendor_dlkm image so graphics can
+# be initialized before the native UI starts. rfkill is bundled from Myron's
+# exact system_dlkm build because its flattened GKI path is not visible to the
+# post-decrypt module stager. The audio codec/machine modules are resolved
+# dependency-first from the installed slot-matched vendor_dlkm.
 # ─────────────────────────────────────────────────────────
-AERA_LOAD_VENDOR_MODULES := "focaltech_touch_3683.ko xiaomi_touch.ko adsp_loader_dlkm.ko q6_dlkm.ko q6_pdr_dlkm.ko q6_notifier_dlkm.ko snd_event_dlkm.ko gpr_dlkm.ko spf_core_dlkm.ko rproc_qcom_common.ko qcom_q6v5.ko qcom_q6v5_pas.ko qcom_sysmon.ko qcom-hv-haptics.ko swr_haptics_dlkm.ko"
+AERA_LOAD_VENDOR_MODULES := "rfkill.ko focaltech_touch_3683.ko xiaomi_touch.ko q6_notifier_dlkm.ko spf_core_dlkm.ko audpkt_ion_dlkm.ko gpr_dlkm.ko audio_pkt_dlkm.ko q6_dlkm.ko adsp_loader_dlkm.ko audio_prm_dlkm.ko q6_pdr_dlkm.ko pinctrl_lpi_dlkm.ko swr_dlkm.ko swr_ctrl_dlkm.ko snd_event_dlkm.ko wcd_core_dlkm.ko mbhc_dlkm.ko sdca_registers_dlkm.ko wcd9xxx_dlkm.ko stub_dlkm.ko swr_dmic_dlkm.ko swr_haptics_dlkm.ko hdmi_dlkm.ko lpass_cdc_wsa2_macro_dlkm.ko lpass_cdc_wsa_macro_dlkm.ko lpass_cdc_va_macro_dlkm.ko lpass_cdc_rx_macro_dlkm.ko lpass_cdc_tx_macro_dlkm.ko lpass_cdc_dlkm.ko wsa884x_dlkm.ko wsa883x_dlkm.ko wcd938x_dlkm.ko wcd938x_slave_dlkm.ko wcd939x_dlkm.ko wcd939x_slave_dlkm.ko wcd9378_dlkm.ko wcd9378_slave_dlkm.ko lpass_bt_swr_dlkm.ko machine_dlkm.ko tfa98xx_dlkm.ko frpc-adsprpc.ko rproc_qcom_common.ko qcom_q6v5.ko qcom_q6v5_pas.ko qcom_sysmon.ko qcom-hv-haptics.ko msm_kgsl.ko"
 AERA_POST_DECRYPT_MODULES := "smem-mailbox.ko cnss_prealloc.ko cnss_utils.ko cnss_plat_ipc_qmi_svc.ko cnss_nl.ko wlan_firmware_service.ko cnss2.ko rfkill.ko cfg80211.ko gsim.ko rmnet_mem.ko ipam.ko qca_cld3_peach_v2.ko"
 AERA_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
 AERA_LOAD_PREBUILT_MODULES_AT_FIRST := true
+AERA_LOAD_VENDOR_BOOT_MODULES := true
 
 # ─────────────────────────────────────────────────────────
 # Vibrator (cs40l26 haptics)

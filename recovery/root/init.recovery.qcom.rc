@@ -6,6 +6,66 @@
 import /init.recovery.hlthchrg.rc
 import /init.recovery.wifi.rc
 
+# Myron's matching SM8850 gralloc/mapper stack is bundled in the recovery
+# ramdisk. Start its allocator before AERA requests hardware-backed buffers.
+on early-init
+    setprop vendor.gralloc.enable_snapalloc true
+
+service aera-graphics-allocator /vendor/bin/hw/vendor.qti.hardware.display.allocator-service
+    class hal
+    user root
+    group root graphics
+    capabilities SYS_NICE
+    seclabel u:r:recovery:s0
+
+# Stock Qualcomm audio processes run only after the installed slot-matched
+# system/vendor/odm libraries and DSP calibration have been mounted read-only.
+service aera-pd-mapper /vendor/bin/aera-pd-mapper
+    class core
+    disabled
+    user system
+    group system
+    seclabel u:r:recovery:s0
+    setenv LD_LIBRARY_PATH /vendor/aera-audio-abi:/vendor/aera-stock-lib64:/vendor/lib64:/system/lib64
+
+service aera-dspservice /vendor/bin/aera-dspservice
+    class hal
+    disabled
+    user system
+    group system wakelock oem_2908
+    capabilities BLOCK_SUSPEND
+    seclabel u:r:recovery:s0
+    setenv LD_LIBRARY_PATH /vendor/aera-audio-abi:/vendor/aera-stock-lib64:/vendor/lib64:/system/lib64
+    interface aidl vendor.qti.hardware.dsp.IDspService/default
+
+service aera-audioadsprpcd /vendor/bin/aera-audioadsprpcd audiopd adsp
+    class main
+    disabled
+    user media
+    group media
+    seclabel u:r:recovery:s0
+    setenv LD_LIBRARY_PATH /vendor/aera-audio-abi:/vendor/aera-stock-lib64:/vendor/lib64:/system/lib64
+
+service aera-agm-service /system/bin/aera-audio-service --myron-stock-agm
+    class main
+    disabled
+    user root
+    group root system audio media wakelock
+    seclabel u:r:recovery:s0
+    setenv LD_LIBRARY_PATH /vendor/aera-audio-abi:/vendor/aera-stock-lib64:/vendor/lib64:/system/lib64
+    setenv ANDROID_ROOT /system
+    setenv ANDROID_DATA /data
+    interface aidl vendor.qti.hardware.agm.IAGM/default
+    interface aidl vendor.qti.hardware.pal.IPAL/default
+
+service aera-audio-bootstrap /system/bin/aera-audio-bootstrap
+    class core
+    disabled
+    oneshot
+    user root
+    group root system audio media wakelock
+    seclabel u:r:recovery:s0
+
 # -----------------------------------------------------------------------------
 # Init sequence:
 #   late-init → early-fs → fs → post-fs → firmware → boot
@@ -119,6 +179,9 @@ on property:servicemanager.ready=true
 
 on property:sys.boot_completed=1
     start myron-nxp-gate
+
+on property:post.decrypt.modules=true
+    start aera-audio-bootstrap
 
 # -----------------------------------------------------------------------------
 # myron-specific services

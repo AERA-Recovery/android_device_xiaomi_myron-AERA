@@ -36,10 +36,19 @@ PRODUCT_APEX_SYSTEM_SERVER_JARS += com.android.crashrecovery:service-crashrecove
 
 # ─── lptools ──────────────────────────────────────────────────────────────────
 PRODUCT_PACKAGES += \
+    aera-audio-bridge \
+    aera-audio-service \
     aera-browser-jail \
     lpflash \
     lpmake \
     lpunpack
+
+# Myron uses the SM8850 Adreno 840 stack extracted from its matching stock
+# image. Keep this device-scoped so AERA retains the software renderer on
+# devices without a validated proprietary userspace/kernel pairing.
+PRODUCT_VENDOR_PROPERTIES += \
+    ro.hardware.egl=adreno \
+    vendor.gralloc.enable_snapalloc=1
 
 # ─── Release key ──────────────────────────────────────────────────────────────
 PRODUCT_EXTRA_RECOVERY_KEYS += \

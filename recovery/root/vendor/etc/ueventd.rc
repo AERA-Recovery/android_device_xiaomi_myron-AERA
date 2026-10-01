@@ -2,3 +2,5 @@
 /dev/smcinvoke            0660   system     system
 /dev/qseecom              0660   system     drmrpc
 /dev/ion                  0664   system     system
+/dev/fastrpc-nsp*         0644   system     system
+/dev/fastrpc-lpass*       0644   system     system
