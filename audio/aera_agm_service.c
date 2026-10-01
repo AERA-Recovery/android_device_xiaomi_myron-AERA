@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Small recovery-side host for Qualcomm's device-matched AGM implementation.
- * The proprietary implementation remains on the installed stock /vendor and
- * is loaded only on Myron. Plugins never receive /dev/snd or partition access.
+ * The proprietary implementation and its matching runtime are shipped in the
+ * Myron recovery ramdisk. Plugins never receive /dev/snd or partition access.
  */
 #include <android/binder_ibinder.h>
 #include <android/binder_process.h>
@@ -17,9 +17,9 @@
 
 static const char kTag[] = "AERAAudio";
 static const char kAgmService[] =
-    "/mnt/aera-stock/vendor/lib64/libagmipcservice.so";
+    "/vendor/aera-stock-lib64/libagmipcservice.so";
 static const char kPalService[] =
-    "/mnt/aera-stock/vendor/lib64/libpalipcservice.so";
+    "/vendor/aera-stock-lib64/libpalipcservice.so";
 
 // binder_manager.h currently exposes C++-only typedef spellings in this
 // branch's platform header. The exported NDK function itself has a C ABI.
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
   }
   if (getuid() != 0 || access(kAgmService, R_OK) != 0 ||
       access(kPalService, R_OK) != 0) {
-    Log(ANDROID_LOG_ERROR, "The read-only stock audio runtime is unavailable.");
+    Log(ANDROID_LOG_ERROR, "The bundled Myron audio runtime is unavailable.");
     return 66;
   }
 

@@ -404,8 +404,8 @@ pid_t StartPlayer(const std::string& fifo) {
   if (child != 0) return child;
   prctl(PR_SET_PDEATHSIG, SIGTERM, 0, 0, 0);
   setenv("LD_LIBRARY_PATH",
-         "/vendor/aera-audio-abi:/mnt/aera-stock/vendor/lib64:"
-         "/mnt/aera-stock/odm/lib64:/vendor/lib64:/system/lib64", 1);
+         "/vendor/aera-audio-abi:/vendor/aera-stock-lib64:"
+         "/vendor/lib64:/system/lib64", 1);
   setenv("ANDROID_ROOT", "/system", 1);
   setenv("ANDROID_DATA", "/data", 1);
   execl(kSelf, "aera-audio-bridge", "--play-fifo", fifo.c_str(), nullptr);

@@ -2,16 +2,16 @@
 # Copyright (C) 2026 AERA Recovery Project contributors
 # SPDX-License-Identifier: Apache-2.0
 #
-# Mount the installed Myron stock audio stack read-only and start the
-# services used by AERA's protected PAL playback path.
+# Start the self-contained Myron audio stack shipped in recovery. Installed
+# partitions are mounted read-only only for firmware and calibration data.
 
 PATH=/system/bin:/sbin
 export PATH
 stock_root=/mnt/aera-stock
 vendor_root=${stock_root}/vendor
-system_root=${stock_root}/system
 odm_root=${stock_root}/odm
 audio_abi=/vendor/aera-audio-abi
+audio_lib64=/vendor/aera-stock-lib64
 lock=${stock_root}/.audio-lock
 slot_suffix="$(getprop ro.boot.slot_suffix)"
 
@@ -30,7 +30,7 @@ case "$(getprop ro.product.device)" in
         ;;
 esac
 
-mkdir -p "${stock_root}" "${vendor_root}" "${system_root}" "${odm_root}" \
+mkdir -p "${stock_root}" "${vendor_root}" "${odm_root}" \
     /odm/firmware /firmware \
     /vendor/firmware_mnt /vendor/dsp /vendor/lib/rfsa/adsp \
     /vendor/etc/acdbdata \
@@ -75,7 +75,6 @@ mount_read_only() {
 }
 
 mount_read_only vendor "${vendor_root}" || fail "could not mount stock vendor"
-mount_read_only system "${system_root}" || fail "could not mount stock system"
 mount_read_only odm "${odm_root}" || fail "could not mount stock odm"
 
 # The dedicated slot-matched DSP partition carries AudioPD modules. Android
@@ -91,13 +90,22 @@ fi
 [ -e /dsp ] || ln -s /vendor/dsp /dsp || \
     fail "could not expose the stock /dsp path"
 
-# Qualcomm's audio processes are built against the framework Binder ABI from
-# the installed Myron system. Recovery's Binder-NDK library is close enough to
-# load but is not compatible with the vendor-side Binder snapshot, causing
-# audioadsprpcd and dspservice to restart before AudioPD comes up. Expose only
-# the two ABI-matched Binder libraries rather than overlaying /system.
-system_lib64="${system_root}/system/lib64"
-[ -f "${system_lib64}/libbinder.so" ] || system_lib64="${system_root}/lib64"
+# Qualcomm's audio processes require a single coherent Binder/C++/vendor ABI.
+# Every executable library is shipped from the same Myron firmware snapshot;
+# never mix it with libraries from whichever Android ROM happens to be
+# installed. The active slot remains data-only for firmware and calibration.
+for required_runtime in \
+    "${audio_abi}/libbinder.so" \
+    "${audio_abi}/libbinder_ndk.so" \
+    "${audio_abi}/libc++.so" \
+    "${audio_lib64}/libadsp_default_listener.so" \
+    "${audio_lib64}/libagmipcservice.so" \
+    "${audio_lib64}/libpalipcservice.so" \
+    "${audio_lib64}/libar-pal.so"; do
+    [ -s "${required_runtime}" ] || \
+        fail "missing bundled audio runtime ${required_runtime}"
+done
+
 bind_file_read_only() {
     source_file="$1"
     target_file="$2"
@@ -110,25 +118,12 @@ bind_file_read_only() {
         mount -o remount,bind,ro "${target_file}" 2>/dev/null
     fi
 }
-bind_file_read_only "${system_lib64}/libbinder.so" \
-    "${audio_abi}/libbinder.so"
-bind_file_read_only "${system_lib64}/libbinder_ndk.so" \
-    "${audio_abi}/libbinder_ndk.so"
 # The TFA speaker codec requests its device-matched tuning container from ODM.
 bind_file_read_only "${odm_root}/firmware/tfa98xx.cnt" \
     "/odm/firmware/tfa98xx.cnt"
 bind_file_read_only \
     "${vendor_root}/etc/seccomp_policy/vendor.qti.hardware.dsp.policy" \
     "/vendor/etc/seccomp_policy/vendor.qti.hardware.dsp.policy"
-
-# Keep AERA's vendor tree and GPU userspace visible. Qualcomm's matching
-# library directory is exposed under /vendor so the vendor linker namespace
-# accepts it, without overlaying /vendor or disturbing a running/restarted UI.
-if ! grep -q ' /vendor/aera-stock-lib64 ' /proc/mounts; then
-    mount -o bind "${vendor_root}/lib64" /vendor/aera-stock-lib64 || \
-        fail "could not expose the installed stock audio libraries"
-    mount -o remount,bind,ro /vendor/aera-stock-lib64 2>/dev/null
-fi
 
 # The modem partition owns the ADSP images and service-locator JSON files.
 # Recovery normally unmounts it after the PMIC bootstrap, so restore it for

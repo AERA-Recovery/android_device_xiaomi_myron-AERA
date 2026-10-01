@@ -18,8 +18,9 @@ service aera-graphics-allocator /vendor/bin/hw/vendor.qti.hardware.display.alloc
     capabilities SYS_NICE
     seclabel u:r:recovery:s0
 
-# Stock Qualcomm audio processes run only after the installed slot-matched
-# system/vendor/odm libraries and DSP calibration have been mounted read-only.
+# Qualcomm audio processes and their matching runtime ship in the recovery
+# ramdisk. Installed vendor/odm partitions provide only firmware, policy and
+# device calibration data, mounted read-only by the bootstrap.
 service aera-pd-mapper /vendor/bin/aera-pd-mapper
     class core
     disabled
