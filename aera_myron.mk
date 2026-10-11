@@ -40,7 +40,7 @@ AERA_NO_RELOAD_AFTER_DECRYPTION := 1
 AERA_NO_TREBLE_COMPATIBILITY_CHECK := 1
 AERA_USE_LZ4_COMPRESSION := 1
 AERA_ENABLE_WLAN := 1
-AERA_ENABLE_FRP_ADDON := 1
+AERA_ENABLE_FRP_WIPE := 1
 
 # This ROM family may leave an already populated /data/media/0 without a
 # directory-level fscrypt policy. The CE key still unlocks its contents; allow
