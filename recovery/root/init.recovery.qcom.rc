@@ -163,9 +163,11 @@ on property:twrp.modules.loaded=true
     insmod /vendor/lib/modules/stm_nfc_i2c.ko
     insmod /vendor/lib/modules/nxp-nci.ko
 
-    # Touch: force normal coordinate reporting mode (disable raw/THP)
+    # Touch: select normal coordinate reporting mode once after its modules
+    # have loaded. Rewriting the node every second needlessly wakes the input
+    # stack while Wi-Fi and other background work is settling.
     wait /sys/class/touch/touch_dev/enable_touch_raw
-    start touch-raw-guard
+    write /sys/class/touch/touch_dev/enable_touch_raw 0
 
     # Start health HAL for battery monitoring
     start vendor.health-default
@@ -187,16 +189,6 @@ on property:post.decrypt.modules=true
 # -----------------------------------------------------------------------------
 # myron-specific services
 # -----------------------------------------------------------------------------
-
-# Keep FocalTech in normal input-reporting mode
-# enable_touch_raw=1 blocks normal getevent coordinates
-service touch-raw-guard /system/bin/sh -c \
-    "while true; do echo 0 > /sys/class/touch/touch_dev/enable_touch_raw 2>/dev/null; sleep 1; done"
-    class main
-    user root
-    group root system input
-    oneshot
-    seclabel u:r:recovery:s0
 
 # Start NXP eSE/Weaver in the same order as the working Xiaomi 17 Pro Max TWRP.
 service myron-nxp-gate /system/bin/myron-nxp-gate.sh

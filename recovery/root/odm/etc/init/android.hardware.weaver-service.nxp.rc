@@ -3,6 +3,8 @@ service odm.weaver_nxp /odm/bin/hw/android.hardware.weaver-service.nxp-qti
     user root
     group root system
     interface aidl android.hardware.weaver.IWeaver/default
-    setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib64/hw:/system/lib64:/sbin:/odm/lib64
+    # AIDL Weaver registers with the system Binder service manager. Prefer
+    # recovery's Binder runtime even while installed vendor is mounted.
+    setenv LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw:/sbin:/odm/lib64
     disabled
     seclabel u:r:recovery:s0

@@ -101,6 +101,8 @@ for required_runtime in \
     "${audio_lib64}/libadsp_default_listener.so" \
     "${audio_lib64}/libagmipcservice.so" \
     "${audio_lib64}/libpalipcservice.so" \
+    "${audio_lib64}/libstream_contextproxy.so" \
+    "${audio_lib64}/libstream_common.so" \
     "${audio_lib64}/libar-pal.so"; do
     [ -s "${required_runtime}" ] || \
         fail "missing bundled audio runtime ${required_runtime}"
@@ -144,6 +146,12 @@ fi
 # owns /odm as a rootfs directory, so expose only the required stock subtree.
 [ -d "${odm_root}/etc/acdbdata" ] || \
     fail "missing stock ODM audio calibration database"
+# libagm uses the stock Mi selector; keep the directory layout intact so
+# calibration and its companion models remain at their original paths.
+[ "$(getprop ro.vendor.audio.algorithm.support)" = Mi ] || \
+    fail "missing Myron AGM calibration selector (expected Mi)"
+[ -s "${odm_root}/etc/acdbdata/Mi/Mi_acdb_cal.acdb" ] || \
+    fail "missing Myron Mi audio calibration database"
 mkdir -p /odm/etc/acdbdata
 if ! grep -q ' /odm/etc/acdbdata ' /proc/mounts; then
     mount -o bind "${odm_root}/etc/acdbdata" /odm/etc/acdbdata || \

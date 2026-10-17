@@ -29,6 +29,9 @@ ro.hardware=qcom
 vendor.gatekeeper.disable_spu=true
 vendor.gatekeeper.is_security_level_spu=0
 
+# Stock AGM appends this device calibration selector to /odm/etc/acdbdata/.
+ro.vendor.audio.algorithm.support=Mi
+
 # Display
 ro.minui.pixel_format=RGBX_8888
 ro.minui.overscan_percent=0
