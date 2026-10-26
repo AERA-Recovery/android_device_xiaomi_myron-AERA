@@ -116,8 +116,8 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.ffs.mtp.ready=1 && property:
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
 
-on property:sys.usb.config=sideload && property:sys.usb.configfs=1
-    start adbd
+# minadbd owns the ADB FunctionFS endpoint during sideload. The recovery
+# sideload code stops adbd before switching USB into this mode.
 
 on property:sys.usb.ffs.ready=1 && property:sys.usb.config=sideload && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
